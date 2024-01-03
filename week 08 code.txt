@@ -1,0 +1,149 @@
+#include <iostream> 
+#include <iomanip> 
+#include <limits> 
+const int NUM_BOATS = 10;
+const int OPENING_HOUR = 10;
+const int CLOSING_HOUR = 17;
+const double HOURLY_RATE = 20.0;
+const double HALF_HOUR_RATE = 12.0;
+struct Boat { 
+ bool available;
+ double totalHours;
+ int returnTime;
+};
+void displayMenu() { 
+ std::cout << "Welcome to the Boat Hiring System!\n";
+ std::cout << "Menu:\n";
+ std::cout << "1. Hire a Boat\n";
+ std::cout << "2. Check End-of-Day Report\n";
+ std::cout << "3. Exit\n";
+ std::cout << "Enter your choice: ";
+} 
+void hireBoat(Boat boats[]) { 
+ std::cout << "Available Boats:\n";
+ for (int i = 0; i < NUM_BOATS; ++i) {
+ if (boats[i].available) { 
+ std::cout << "Boat " << (i + 1) << std::endl;
+ } 
+ } 
+ int boatNumber;
+ do { 
+ std::cout << "Enter the number of the boat you want to hire (or enter -1 to 
+go back to the menu): ";
+ std::cin >> boatNumber;
+ if (boatNumber == -1) { 
+ return;
+ } 
+ if (boatNumber < 1 || boatNumber > NUM_BOATS || !boats[boatNumber - 
+1].available) { 
+ std::cout << "Invalid boat number or the boat is not available. Try 
+again.\n";
+ } 
+ } while (boatNumber < 1 || boatNumber > NUM_BOATS || 
+!boats[boatNumber - 1].available);
+ int currentTime;
+ do { 
+ std::cout << "Enter the current time (between 10 and 16): ";
+ std::cin >> currentTime;
+ if (currentTime < OPENING_HOUR || currentTime >= 
+CLOSING_HOUR) { 
+ std::cout << "Boats can only be hired between 10:00 and 17:00. Try 
+again.\n";
+ } 
+ } while (currentTime < OPENING_HOUR || currentTime >= 
+CLOSING_HOUR);
+ int duration;
+ do { 
+ std::cout << "Boat " << boatNumber << ":\n";
+ std::cout << "Enter the duration of hiring (0.5 or 1) hour(s): ";
+ std::cin >> duration;
+ if (duration != 0.5 && duration != 1) { 
+ std::cout << "Invalid duration. Please enter 0.5 or 1.\n";
+ } 
+ } while (duration != 0.5 && duration != 1);
+ int hireTime;
+ do { 
+ std::cout << "Enter the time when the boat is hired (between 10 and 16): ";
+ std::cin >> hireTime;
+ if (hireTime < OPENING_HOUR || hireTime >= CLOSING_HOUR || 
+hireTime + duration > CLOSING_HOUR) { 
+ std::cout << "Invalid hire time or duration. Try again.\n";
+ } 
+ } while (hireTime < OPENING_HOUR || hireTime >= CLOSING_HOUR || 
+hireTime + duration > CLOSING_HOUR);
+ // Update boat information 
+ boats[boatNumber - 1].available = false;
+ boats[boatNumber - 1].totalHours += duration;
+ boats[boatNumber - 1].returnTime = hireTime + duration;
+ // Calculate cost 
+ double cost = (duration == 1) ? HOURLY_RATE : HALF_HOUR_RATE;
+ // Display confirmation 
+ std::cout << "Hired for " << duration << " hours starting at " << hireTime << 
+":00.\n";
+ std::cout << "Must be returned at " << boats[boatNumber - 1].returnTime << 
+":00.\n";
+ std::cout << "Total cost: $" << std::fixed << std::setprecision(2) << cost << 
+".\n";
+ std::cout << "Boat " << boatNumber << ": $" << cost << " (Total hours: " << 
+boats[boatNumber - 1].totalHours << ")\n";
+} 
+void endOfDayReport(const Boat boats[]) { 
+ double totalMoney = 0.0;
+ double totalHours = 0.0;
+ int unusedBoats = 0;
+ int mostUsedBoat = -1;
+ double maxHours = 0.0;
+ for (int i = 0; i < NUM_BOATS; ++i) {
+ totalMoney += (boats[i].totalHours * HOURLY_RATE);
+ totalHours += boats[i].totalHours;
+ if (boats[i].available) { 
+ unusedBoats++;
+ } else if (boats[i].totalHours > maxHours) { 
+ maxHours = boats[i].totalHours;
+ mostUsedBoat = i;
+ } 
+ } 
+ std::cout << "Task 3: Calculate the money taken for all the boats at the end of 
+the day\n";
+ std::cout << "Report for the owner:\n";
+ std::cout << "Total money taken: $" << std::fixed << std::setprecision(2) << 
+totalMoney << "\n";
+ std::cout << "Total hours hired: " << totalHours << "\n";
+ std::cout << "Unused boats: " << unusedBoats << "\n";
+ if (mostUsedBoat != -1) { 
+ std::cout << "Most used boat: Boat " << (mostUsedBoat + 1) << " with " 
+<< maxHours << " hours.\n";
+ } else { 
+ std::cout << "No boats were used today.\n";
+ } 
+} 
+int main() { 
+ Boat boats[NUM_BOATS];
+ for (int i = 0; i < NUM_BOATS; ++i) {
+ boats[i].available = true;
+ boats[i].totalHours = 0.0;
+ boats[i].returnTime = 0;
+ } 
+ int choice;
+ do { 
+ displayMenu();
+ std::cin >> choice;
+ switch (choice) { 
+ case 1: 
+ hireBoat(boats);
+ break;
+ case 2: 
+ endOfDayReport(boats);
+ break;
+ case 3: 
+ std::cout << "Thank you for using the Boat Hiring System!\n";
+ break;
+ default: 
+ std::cout << "Invalid choice. Please try again.\n";
+ // Clear the input buffer 
+ std::cin.clear();
+ std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+ } 
+ } while (choice != 3);
+ return 0;
+}
